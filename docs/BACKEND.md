@@ -1,24 +1,49 @@
-# MoneyBuddy — Backend
+# FinPilot — Backend
+
+> REST API + AI integration for the FinPilot personal finance advisor.
 
 ## Tech Stack
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB (Mongoose)
-- **Auth:** JWT (JSON Web Tokens)
-- **Password Hashing:** bcrypt
+| Tool | Purpose |
+|------|---------|
+| Node.js + Express.js | Server & REST API |
+| MongoDB + Mongoose | Database & ODM |
+| JWT | Authentication tokens |
+| bcrypt | Password hashing |
+| OpenAI SDK | AI financial advisor |
+| dotenv | Environment variables |
+| cors | Allow frontend requests |
+| express-validator | Input validation |
 
 ## Folder Structure
 ```
 backend/
 ├── src/
-│   ├── controllers/     # Logic for each route (authController, transactionController...)
-│   ├── models/          # Mongoose schemas (User, Transaction, Budget...)
-│   ├── routes/          # Route definitions (authRoutes, transactionRoutes...)
-│   ├── middleware/       # Auth middleware (protect.js), error handler
-│   ├── utils/           # Helper functions
-│   └── app.js           # Express app setup
-├── .env                 # Secrets (never commit this!)
-├── server.js            # Entry point
+│   ├── controllers/
+│   │   ├── authController.js         # register, login
+│   │   ├── transactionController.js  # CRUD for expenses/income
+│   │   ├── budgetController.js       # CRUD for budgets
+│   │   ├── goalController.js         # CRUD for savings goals
+│   │   └── aiController.js           # AI chat, spending analysis
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Transaction.js
+│   │   ├── Budget.js
+│   │   └── Goal.js
+│   ├── routes/
+│   │   ├── authRoutes.js
+│   │   ├── transactionRoutes.js
+│   │   ├── budgetRoutes.js
+│   │   ├── goalRoutes.js
+│   │   └── aiRoutes.js
+│   ├── middleware/
+│   │   ├── protect.js                # JWT auth guard
+│   │   └── errorHandler.js           # Global error handler
+│   ├── utils/
+│   │   └── buildSpendingSummary.js   # Helper: format data for AI prompt
+│   └── app.js                        # Express setup, mount routes
+├── .env
+├── .gitignore
+├── server.js                         # Entry point
 └── package.json
 ```
 
@@ -31,83 +56,169 @@ npm run dev
 Server runs at: `http://localhost:5000`
 
 ## Environment Variables
-Create a `.env` file in the `backend/` folder:
+Create `backend/.env` — **never commit this file**:
 ```
 PORT=5000
-MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/moneybuddy
-JWT_SECRET=your_super_secret_key
+MONGO_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/finpilot
+JWT_SECRET=your_long_random_secret_here
+OPENAI_API_KEY=sk-...
+CLIENT_URL=http://localhost:5173
 ```
 > **Never commit `.env` to GitHub.** It's already in `.gitignore`.
+
+---
 
 ## Database Models
 
 ### User
-| Field     | Type   | Notes              |
-|-----------|--------|--------------------|
-| name      | String | required           |
-| email     | String | required, unique   |
-| password  | String | hashed with bcrypt |
-| createdAt | Date   | auto               |
+| Field     | Type   | Notes                   |
+|-----------|--------|-------------------------|
+| name      | String | required                |
+| email     | String | required, unique        |
+| password  | String | hashed with bcrypt      |
+| createdAt | Date   | auto                    |
 
 ### Transaction
-| Field       | Type     | Notes                        |
-|-------------|----------|------------------------------|
-| user        | ObjectId | ref: User                    |
-| title       | String   | e.g. "Groceries"             |
-| amount      | Number   | positive number              |
-| type        | String   | `income` or `expense`        |
-| category    | String   | e.g. "Food", "Rent"          |
-| date        | Date     | transaction date             |
+| Field    | Type     | Notes                                               |
+|----------|----------|-----------------------------------------------------|
+| user     | ObjectId | ref: User                                           |
+| title    | String   | e.g. "Lunch at Subway"                              |
+| amount   | Number   | positive number                                     |
+| type     | String   | `income` or `expense`                               |
+| category | String   | `Food` \| `Transport` \| `Entertainment` \| `Shopping` \| `Bills` \| `Other` |
+| date     | Date     | transaction date                                    |
 
 ### Budget
-| Field    | Type     | Notes             |
-|----------|----------|-------------------|
-| user     | ObjectId | ref: User         |
-| category | String   | e.g. "Food"       |
-| limit    | Number   | monthly limit     |
-| month    | String   | e.g. "2026-03"    |
+| Field    | Type     | Notes                              |
+|----------|----------|------------------------------------|
+| user     | ObjectId | ref: User                          |
+| month    | String   | e.g. `"2026-03"`                   |
+| income   | Number   | monthly income                     |
+| limits   | Map      | `{ Food: 300, Transport: 100, ... }` |
+
+### Goal
+| Field        | Type     | Notes                      |
+|--------------|----------|----------------------------|
+| user         | ObjectId | ref: User                  |
+| name         | String   | e.g. "Emergency Fund"      |
+| targetAmount | Number   | goal target                |
+| savedAmount  | Number   | current saved amount       |
+| targetDate   | Date     | deadline                   |
+
+---
 
 ## API Endpoints
 
-### Auth
-| Method | Endpoint             | Description        |
-|--------|----------------------|--------------------|
-| POST   | `/api/auth/register` | Register new user  |
-| POST   | `/api/auth/login`    | Login, returns JWT |
+> All routes except `/api/auth/*` require header:
+> `Authorization: Bearer <token>`
 
-### Transactions
-| Method | Endpoint                    | Description              |
-|--------|-----------------------------|--------------------------|
-| GET    | `/api/transactions`         | Get all (logged-in user) |
-| POST   | `/api/transactions`         | Add new transaction      |
-| PUT    | `/api/transactions/:id`     | Update transaction       |
-| DELETE | `/api/transactions/:id`     | Delete transaction       |
+### Auth — `/api/auth`
+| Method | Endpoint    | Body                          | Response            |
+|--------|-------------|-------------------------------|---------------------|
+| POST   | `/register` | `{ name, email, password }`   | `{ token, user }`   |
+| POST   | `/login`    | `{ email, password }`         | `{ token, user }`   |
 
-### Budgets
-| Method | Endpoint            | Description         |
-|--------|---------------------|---------------------|
-| GET    | `/api/budgets`      | Get all budgets     |
-| POST   | `/api/budgets`      | Create/update budget|
+### Transactions — `/api/transactions`
+| Method | Endpoint   | Body / Query                              | Description             |
+|--------|------------|-------------------------------------------|-------------------------|
+| GET    | `/`        | query: `?month=2026-03&category=Food`     | Get user's transactions |
+| POST   | `/`        | `{ title, amount, type, category, date }` | Add transaction         |
+| PUT    | `/:id`     | any transaction fields                    | Update transaction      |
+| DELETE | `/:id`     | —                                         | Delete transaction      |
+| GET    | `/summary` | query: `?month=2026-03`                   | Totals by category      |
 
-## Auth Middleware
-Protect private routes using `middleware/protect.js`:
+### Budgets — `/api/budgets`
+| Method | Endpoint | Body                              | Description             |
+|--------|----------|-----------------------------------|-------------------------|
+| GET    | `/`      | query: `?month=2026-03`           | Get budget for month    |
+| POST   | `/`      | `{ month, income, limits: {} }`   | Create or update budget |
+
+### Goals — `/api/goals`
+| Method | Endpoint | Body                                              | Description   |
+|--------|----------|---------------------------------------------------|---------------|
+| GET    | `/`      | —                                                 | Get all goals |
+| POST   | `/`      | `{ name, targetAmount, savedAmount, targetDate }` | Create goal   |
+| PUT    | `/:id`   | `{ savedAmount }` (or any field)                  | Update goal   |
+| DELETE | `/:id`   | —                                                 | Delete goal   |
+
+### AI Advisor — `/api/ai`
+| Method | Endpoint    | Body / Query            | Description                     |
+|--------|-------------|-------------------------|---------------------------------|
+| POST   | `/chat`     | `{ message }`           | Send message, get AI response   |
+| GET    | `/insights` | query: `?month=2026-03` | Auto-generate spending insights |
+
+---
+
+## Auth Middleware (`middleware/protect.js`)
 ```js
 const protect = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-  if (!token) return res.status(401).json({ message: 'Not authorized' });
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  req.user = await User.findById(decoded.id).select('-password');
-  next();
+  if (!token) return res.status(401).json({ success: false, message: 'Not authorized' });
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id).select('-password');
+    next();
+  } catch {
+    res.status(401).json({ success: false, message: 'Token invalid or expired' });
+  }
 };
 ```
-Use it on routes: `router.get('/', protect, getTransactions)`
+Usage: `router.get('/', protect, getTransactions)`
+
+---
+
+## AI Integration (`controllers/aiController.js`)
+The AI controller:
+1. Fetches the user's recent transactions from DB
+2. Builds a spending summary string via `buildSpendingSummary.js`
+3. Sends it as system context + the user's message to OpenAI
+4. Returns the AI response to the frontend
+
+```js
+export const chat = async (req, res) => {
+  const { message } = req.body;
+  const transactions = await Transaction.find({ user: req.user._id });
+  const summary = buildSpendingSummary(transactions);
+
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      { role: 'system', content: `You are FinPilot, an AI financial advisor. User spending: ${summary}` },
+      { role: 'user', content: message },
+    ],
+  });
+
+  res.json({ success: true, data: completion.choices[0].message.content });
+};
+```
+
+---
+
+## Response Format
+Always return consistent JSON:
+```js
+// Success
+res.json({ success: true, data: <payload> })
+
+// Error
+res.status(4xx).json({ success: false, message: '<reason>' })
+```
+
+---
 
 ## Git Workflow
-1. Always pull latest before starting: `git pull origin main`
-2. Create a branch: `git checkout -b backend/feature-name`
-3. Push and open a Pull Request when done
+```bash
+git pull origin main
+git checkout -b backend/feature-name
+# build the feature
+git add .
+git commit -m "backend: describe what you built"
+git push origin backend/feature-name
+# open Pull Request on GitHub
+```
 
 ## Coding Conventions
-- One controller per resource (transactionController.js)
-- Always return consistent JSON: `{ success: true, data: ... }` or `{ success: false, message: ... }`
-- Never put logic in route files — keep routes thin, controllers fat
+- One controller per resource — keep route files thin
+- Validate all inputs with `express-validator` before processing
+- Never expose passwords or JWT secrets in responses
+- All async handlers wrapped in try/catch or use `express-async-errors`
