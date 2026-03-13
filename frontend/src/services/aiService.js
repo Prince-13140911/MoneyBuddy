@@ -42,3 +42,5 @@ export const fetchInsights = async () => {
     },
   }
 }
+
+export const getAIReport = async (prompt) => sendChatMessage(prompt)

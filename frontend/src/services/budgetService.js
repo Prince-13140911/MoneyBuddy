@@ -15,8 +15,18 @@ const DEMO_GOALS = [
   { _id: 'goal3', title: 'New Laptop',     targetAmount: 1200, savedAmount: 600,  deadline: '2026-06-01' },
 ]
 
-const loadBudgets = () => JSON.parse(localStorage.getItem(BUDGET_KEY) || JSON.stringify([DEMO_BUDGET]))
-const loadGoals   = () => JSON.parse(localStorage.getItem(GOAL_KEY)   || JSON.stringify(DEMO_GOALS))
+function parseStoredValue(key, fallbackValue) {
+  try {
+    const rawValue = localStorage.getItem(key)
+    return rawValue ? JSON.parse(rawValue) : fallbackValue
+  } catch {
+    localStorage.removeItem(key)
+    return fallbackValue
+  }
+}
+
+const loadBudgets = () => parseStoredValue(BUDGET_KEY, [DEMO_BUDGET])
+const loadGoals   = () => parseStoredValue(GOAL_KEY, DEMO_GOALS)
 const saveBudgets = (d) => localStorage.setItem(BUDGET_KEY, JSON.stringify(d))
 const saveGoals   = (d) => localStorage.setItem(GOAL_KEY,   JSON.stringify(d))
 

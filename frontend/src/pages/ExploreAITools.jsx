@@ -42,8 +42,9 @@ const TOOLS = [
     glow: 'rgba(244,63,94,0.3)',
     title: 'Financial Health Score',
     desc: 'Get a comprehensive score (0–100) measuring your overall financial wellness.',
-    tag: 'Coming Soon',
-    available: false,
+    tag: 'AI Powered',
+    available: true,
+    route: '/financial-health',
   },
   {
     icon: DollarSign,
@@ -61,8 +62,9 @@ const TOOLS = [
     glow: 'rgba(99,102,241,0.3)',
     title: 'Weekly Spending Report',
     desc: 'Auto-generated weekly digest of your spending with trends, alerts and AI insights.',
-    tag: 'Coming Soon',
-    available: false,
+    tag: 'AI Powered',
+    available: true,
+    route: '/weekly-reports',
   },
   {
     icon: Star,
@@ -80,8 +82,9 @@ const TOOLS = [
     glow: 'rgba(236,72,153,0.3)',
     title: 'Learning Hub',
     desc: 'Bite-sized financial literacy lessons curated by AI based on your spending behaviour.',
-    tag: 'Coming Soon',
-    available: false,
+    tag: 'New',
+    available: true,
+    route: '/learning-hub',
   },
 ]
 
@@ -114,8 +117,8 @@ export default function ExploreAITools() {
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
           { val: '8', label: 'AI Tools', color: '#6366F1' },
-          { val: '3', label: 'Available Now', color: '#10B981' },
-          { val: '5', label: 'Coming Soon', color: '#F59E0B' },
+          { val: '8', label: 'Available Now', color: '#10B981' },
+          { val: '0', label: 'Coming Soon', color: '#F59E0B' },
         ].map(({ val, label, color }) => (
           <div key={label} className="glass-card px-5 py-4 flex items-center gap-4">
             <p className="text-3xl font-black" style={{ color }}>{val}</p>

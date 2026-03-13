@@ -83,6 +83,54 @@ const IDEAL_PCT = { Food: 20, Transport: 10, Shopping: 8, Entertainment: 7, Bill
 const stagger = { visible: { transition: { staggerChildren: 0.06 } } }
 const fadeUp  = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0, transition: { duration: 0.4 } } }
 
+function clampScore(value) {
+  return Math.max(0, Math.min(100, Math.round(value)))
+}
+
+function getSavingsScore(income, totalSpent) {
+  if (income <= 0) return 0
+
+  const savingsRate = Math.max(0, (income - totalSpent) / income)
+  let baseScore = 0
+
+  if (savingsRate <= 0.05) baseScore = (savingsRate / 0.05) * 20
+  else if (savingsRate <= 0.1) baseScore = 20 + ((savingsRate - 0.05) / 0.05) * 20
+  else if (savingsRate <= 0.2) baseScore = 40 + ((savingsRate - 0.1) / 0.1) * 25
+  else if (savingsRate <= 0.3) baseScore = 65 + ((savingsRate - 0.2) / 0.1) * 20
+  else if (savingsRate <= 0.4) baseScore = 85 + ((savingsRate - 0.3) / 0.1) * 15
+  else baseScore = 100
+
+  const coverageRatio = Math.min(1, totalSpent / Math.max(income * 0.35, 1))
+  const confidenceFactor = 0.35 + (Math.max(0.45, coverageRatio) * 0.65)
+
+  return clampScore(baseScore * confidenceFactor)
+}
+
+function getBudgetControlScore(spending, income, totalSpent) {
+  if (income <= 0) return 0
+
+  const recommendedTotal = CATS.reduce((sum, category) => sum + (income * category.recommended), 0)
+  const overshootTotal = CATS.reduce(
+    (sum, category) => sum + Math.max(0, (spending[category.key] || 0) - (income * category.recommended)),
+    0
+  )
+  const absoluteDeviation = CATS.reduce(
+    (sum, category) => sum + Math.abs((spending[category.key] || 0) - (income * category.recommended)),
+    0
+  )
+
+  const deviationPenalty = Math.min(55, (absoluteDeviation / Math.max(recommendedTotal, 1)) * 35)
+  const overshootPenalty = Math.min(35, (overshootTotal / Math.max(recommendedTotal, 1)) * 70)
+
+  const expectedTrackedSpend = income * 0.4
+  const coverageGap = expectedTrackedSpend > 0 && totalSpent < expectedTrackedSpend
+    ? (expectedTrackedSpend - totalSpent) / expectedTrackedSpend
+    : 0
+  const coveragePenalty = Math.min(18, coverageGap * 18)
+
+  return clampScore(100 - deviationPenalty - overshootPenalty - coveragePenalty)
+}
+
 // ─── Custom tooltip ───────────────────────────────────────────────
 function ChartTip({ active, payload, label }) {
   if (!active || !payload?.length) return null
@@ -153,17 +201,17 @@ export default function AISpendingAnalysis() {
     return Math.min(100, Math.round((impulseSpend / (income || 1)) * 300))
   }, [spending, income])
 
-  // Savings Discipline: 20% saves = 67, 30% saves = 100 (30% is the benchmark)
-  const savingsScore = Math.min(100, Math.round(Math.max(0, (income - totalSpent) / (income || 1)) / 0.30 * 100))
+  const savingsScore = useMemo(
+    () => getSavingsScore(income, totalSpent),
+    [income, totalSpent]
+  )
 
   const lifestyleScore = Math.min(100, Math.round(((spending.Entertainment || 0) + (spending.Shopping || 0)) / (income || 1) * 300))
 
-  // Budget Control: measures how much categories overshoot AI-recommended amounts
-  // 0% overshoot = 100, 50% overshoot = 50, 100%+ overshoot = 0
-  const _totalRec      = CATS.reduce((s, c) => s + (income || 0) * c.recommended, 0)
-  const _totalOver     = CATS.reduce((s, c) => s + Math.max(0, (spending[c.key] || 0) - (income || 0) * c.recommended), 0)
-  const _overshootRatio = _totalRec > 0 ? _totalOver / _totalRec : 0
-  const controlScore   = Math.min(100, Math.max(0, Math.round((1 - _overshootRatio) * 100)))
+  const controlScore = useMemo(
+    () => getBudgetControlScore(spending, income, totalSpent),
+    [spending, income, totalSpent]
+  )
 
   // Radar chart data
   const radarData = useMemo(() => [

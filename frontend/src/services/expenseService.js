@@ -11,13 +11,22 @@ const DEMO_TRANSACTIONS = [
   { _id: 'demo6', title: 'Amazon', amount: 65,   type: 'expense', category: 'Shopping',     date: new Date().toISOString() },
 ]
 
+function parseTransactions(raw) {
+  try {
+    return JSON.parse(raw)
+  } catch {
+    localStorage.removeItem(KEY)
+    return DEMO_TRANSACTIONS
+  }
+}
+
 const load = () => {
   const raw = localStorage.getItem(KEY)
   if (!raw) {
     localStorage.setItem(KEY, JSON.stringify(DEMO_TRANSACTIONS))
     return DEMO_TRANSACTIONS
   }
-  return JSON.parse(raw)
+  return parseTransactions(raw)
 }
 const save = (data) => localStorage.setItem(KEY, JSON.stringify(data))
 

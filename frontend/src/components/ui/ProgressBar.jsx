@@ -10,14 +10,13 @@ const colorMap = {
 
 export default function ProgressBar({ value, max, color = 'primary', showLabel = true, className = '' }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0
-  const autoColor = pct >= 90 ? 'danger' : pct >= 70 ? 'warning' : color
 
   return (
     <div className={`w-full ${className}`}>
       <div className="w-full bg-slate-800/80 rounded-full h-2 overflow-hidden">
         <motion.div
           className="h-full rounded-full"
-          style={{ background: colorMap[autoColor] }}
+          style={{ background: colorMap[color] || colorMap.primary }}
           initial={{ width: 0 }}
           animate={{ width: `${pct}%` }}
           transition={{ duration: 0.8, ease: 'easeOut' }}

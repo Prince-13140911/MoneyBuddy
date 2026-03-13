@@ -81,7 +81,8 @@ export default function BudgetPlanner() {
                   min="0"
                   value={income}
                   onChange={(e) => setIncome(e.target.value)}
-                  className="input-field pl-8"
+                  className="input-field"
+                  style={{ paddingLeft: '2.5rem' }}
                   placeholder="e.g. 30000"
                 />
               </div>
@@ -100,7 +101,8 @@ export default function BudgetPlanner() {
                         min="0"
                         value={limits[cat]}
                         onChange={(e) => setLimits({ ...limits, [cat]: e.target.value })}
-                        className="input-field pl-7 py-2 text-sm"
+                        className="input-field py-2 text-sm"
+                        style={{ paddingLeft: '2.25rem' }}
                         placeholder="0"
                       />
                     </div>

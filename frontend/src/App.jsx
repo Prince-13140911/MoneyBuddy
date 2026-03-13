@@ -16,6 +16,9 @@ import ExploreAITools from './pages/ExploreAITools'
 import AISpendingAnalysis from './pages/AISpendingAnalysis'
 import FinancialSimulator from './pages/FinancialSimulator'
 import InvestmentJourney from './pages/InvestmentJourney'
+import WeeklyReports from './pages/WeeklyReports'
+import FinancialHealthScore from './pages/FinancialHealthScore'
+import LearningHub from './pages/LearningHub'
 
 function PrivateRoute({ children }) {
   const token = useAuthStore((s) => s.token)
@@ -50,6 +53,9 @@ export default function App() {
         <Route path="/ai-spending" element={<AISpendingAnalysis />} />
         <Route path="/simulator" element={<FinancialSimulator />} />
         <Route path="/investment-journey" element={<InvestmentJourney />} />
+        <Route path="/weekly-reports" element={<WeeklyReports />} />
+        <Route path="/financial-health" element={<FinancialHealthScore />} />
+        <Route path="/learning-hub" element={<LearningHub />} />
       </Route>
     </Routes>
   )

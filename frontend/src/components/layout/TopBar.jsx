@@ -180,8 +180,8 @@ export default function TopBar() {
                   notifications.map(({ id, icon: Icon, iconColor, iconBg, title, desc, time, read }) => (
                     <div
                       key={id}
-                      className="flex items-start gap-3 px-4 py-3 transition-colors group" style={{ borderBottom: '1px solid var(--divider)' }}
-                      style={{ opacity: read ? 0.7 : 1 }}
+                      className="flex items-start gap-3 px-4 py-3 transition-colors group"
+                      style={{ borderBottom: '1px solid var(--divider)', opacity: read ? 0.7 : 1 }}
                     >
                       <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
                         style={{ background: iconBg }}>

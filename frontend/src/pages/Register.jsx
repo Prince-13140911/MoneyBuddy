@@ -77,7 +77,7 @@ export default function Register() {
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="input-field pl-9"
+                className="input-field input-field-icon"
                 placeholder="Your name"
                 required
               />
@@ -91,7 +91,7 @@ export default function Register() {
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="input-field pl-9"
+                className="input-field input-field-icon"
                 placeholder="you@example.com"
                 required
               />
@@ -105,7 +105,7 @@ export default function Register() {
                 type="password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="input-field pl-9"
+                className="input-field input-field-icon"
                 placeholder="Min. 6 characters"
                 required
               />

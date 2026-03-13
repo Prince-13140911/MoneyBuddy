@@ -44,9 +44,9 @@ const GROUPS = [
     label: 'More Tools',
     color: '#6366F1',
     items: [
-      { to: '/explore', icon: BarChart3, label: 'Weekly Reports',         color: '#6366F1' },
-      { to: '/explore', icon: Heart,     label: 'Financial Health Score', color: '#F43F5E' },
-      { to: '/explore', icon: BookOpen,  label: 'Learning Hub',           color: '#8B5CF6' },
+      { to: '/weekly-reports',  icon: BarChart3, label: 'Weekly Reports',         color: '#6366F1', badge: 'NEW' },
+      { to: '/financial-health',icon: Heart,     label: 'Financial Health Score', color: '#F43F5E', badge: 'AI' },
+      { to: '/learning-hub',    icon: BookOpen,  label: 'Learning Hub',           color: '#8B5CF6', badge: 'NEW' },
     ],
   },
 ]

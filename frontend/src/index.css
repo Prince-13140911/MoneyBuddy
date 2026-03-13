@@ -286,6 +286,9 @@ html.light {
   transition: all 0.2s ease;
   font-size: 0.875rem;
 }
+.input-field-icon {
+  padding-left: 2.75rem;
+}
 .input-field::placeholder { color: #4B5563; }
 .input-field:focus {
   outline: none;
