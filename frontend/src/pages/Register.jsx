@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Zap, Mail, Lock, User, ArrowRight } from 'lucide-react'
+import { Zap, Mail, Lock, User, ArrowRight, Sparkles } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { registerUser } from '../services/authService'
+import { registerUser, demoLogin } from '../services/authService'
 import useAuthStore from '../store/useAuthStore'
 
 export default function Register() {
@@ -22,10 +22,24 @@ export default function Register() {
     try {
       const res = await registerUser(form)
       login(res.data.data.user, res.data.data.token)
-      toast.success(`Welcome to FinPilot, ${res.data.data.user.name}!`)
+      toast.success(`Welcome to MoneyBuddy, ${res.data.data.user.name}!`)
       navigate('/dashboard')
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleDemoLogin = async () => {
+    setLoading(true)
+    try {
+      const res = await demoLogin()
+      login(res.data.data.user, res.data.data.token)
+      toast.success('👋 Welcome to the demo!')
+      navigate('/dashboard')
+    } catch {
+      toast.error('Demo login failed')
     } finally {
       setLoading(false)
     }
@@ -48,7 +62,7 @@ export default function Register() {
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
             <Zap size={15} className="text-white" />
           </div>
-          <span className="text-lg font-bold gradient-text">FinPilot</span>
+          <span className="text-lg font-bold gradient-text">MoneyBuddy</span>
         </Link>
 
         <h2 className="text-2xl font-bold text-slate-100 mb-1">Create your account</h2>
@@ -101,6 +115,26 @@ export default function Register() {
             {loading ? 'Creating account...' : <><span>Create Account</span><ArrowRight size={15} /></>}
           </button>
         </form>
+
+        <div className="relative my-5">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t" style={{ borderColor: 'var(--divider)' }} />
+          </div>
+          <div className="relative flex justify-center">
+            <span className="px-3 text-xs text-slate-500" style={{ background: 'var(--glass-bg)' }}>or</span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleDemoLogin}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-sm transition-all duration-200 hover:scale-[1.02]"
+          style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(20,184,166,0.15))', border: '1px solid rgba(99,102,241,0.3)', color: '#a5b4fc' }}
+        >
+          <Sparkles size={15} />
+          Demo Login — no sign up needed
+        </button>
 
         <p className="text-center text-sm text-slate-500 mt-6">
           Already have an account?{' '}

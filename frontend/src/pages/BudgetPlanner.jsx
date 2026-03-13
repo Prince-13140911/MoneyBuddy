@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Save, DollarSign } from 'lucide-react'
+import { Save, IndianRupee } from 'lucide-react'
 import toast from 'react-hot-toast'
 import GlassCard from '../components/ui/GlassCard'
 import ProgressBar from '../components/ui/ProgressBar'
@@ -75,14 +75,14 @@ export default function BudgetPlanner() {
             <div>
               <label className="label">Monthly Income</label>
               <div className="relative">
-                <DollarSign size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+                <IndianRupee size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                 <input
                   type="number"
                   min="0"
                   value={income}
                   onChange={(e) => setIncome(e.target.value)}
                   className="input-field pl-8"
-                  placeholder="e.g. 3000"
+                  placeholder="e.g. 30000"
                 />
               </div>
             </div>
@@ -94,7 +94,7 @@ export default function BudgetPlanner() {
                   <div key={cat} className="flex items-center gap-3">
                     <span className="text-xs text-slate-400 w-28 flex-shrink-0">{cat}</span>
                     <div className="relative flex-1">
-                      <DollarSign size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
+                      <IndianRupee size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500" />
                       <input
                         type="number"
                         min="0"

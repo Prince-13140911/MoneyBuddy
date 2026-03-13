@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Trash2, TrendingUp, TrendingDown } from 'lucide-react'
+import { Plus, Trash2, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import GlassCard from '../components/ui/GlassCard'
 import Badge from '../components/ui/Badge'
 import CategoryPieChart from '../components/charts/CategoryPieChart'
 import useExpenseStore from '../store/useExpenseStore'
+import useBudgetStore from '../store/useBudgetStore'
 import { formatCurrency } from '../utils/formatCurrency'
 import { formatDate, currentMonth } from '../utils/formatDate'
 
@@ -16,14 +17,33 @@ const emptyForm = { title: '', amount: '', type: 'expense', category: 'Food', da
 
 export default function ExpenseTracker() {
   const { transactions, summary, loading, loadTransactions, loadSummary, addTransaction, removeTransaction } = useExpenseStore()
+  const { budget, loadBudget } = useBudgetStore()
   const [form, setForm] = useState(emptyForm)
   const [submitting, setSubmitting] = useState(false)
   const [filter, setFilter] = useState('all')
+  const [alerts, setAlerts] = useState([])
 
   useEffect(() => {
     loadTransactions({ month })
     loadSummary({ month })
+    loadBudget(month)
   }, [])
+
+  // Recalculate budget alerts whenever summary or budget limits change
+  useEffect(() => {
+    if (!budget?.limits) return
+    const newAlerts = []
+    Object.entries(budget.limits).forEach(([cat, limit]) => {
+      const spent = summary[cat] || 0
+      const pct = limit > 0 ? (spent / limit) * 100 : 0
+      if (pct >= 100) {
+        newAlerts.push({ cat, spent, limit, pct, level: 'over' })
+      } else if (pct >= 80) {
+        newAlerts.push({ cat, spent, limit, pct, level: 'warning' })
+      }
+    })
+    setAlerts(newAlerts)
+  }, [summary, budget])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -34,6 +54,17 @@ export default function ExpenseTracker() {
       await loadSummary({ month })
       setForm(emptyForm)
       toast.success('Transaction added!')
+      // Check if this pushed any category over budget
+      if (form.type === 'expense' && budget?.limits?.[form.category]) {
+        const limit = budget.limits[form.category]
+        const newSpent = (summary[form.category] || 0) + parseFloat(form.amount)
+        const pct = (newSpent / limit) * 100
+        if (pct >= 100) {
+          toast.error(`⚠️ Over budget! ${form.category} limit exceeded (${formatCurrency(newSpent)} / ${formatCurrency(limit)})`, { duration: 5000 })
+        } else if (pct >= 80) {
+          toast(`⚠️ ${form.category} budget is ${Math.round(pct)}% used`, { icon: '🔔', duration: 4000 })
+        }
+      }
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to add transaction')
     } finally {
@@ -56,6 +87,32 @@ export default function ExpenseTracker() {
 
   return (
     <motion.div className="space-y-6" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Budget alerts banner */}
+      {alerts.length > 0 && (
+        <div className="space-y-2">
+          {alerts.map(({ cat, spent, limit, pct, level }) => (
+            <motion.div
+              key={cat}
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 px-4 py-3 rounded-xl border text-sm"
+              style={level === 'over'
+                ? { background: 'rgba(244,63,94,0.08)', border: '1px solid rgba(244,63,94,0.25)', color: '#F87171' }
+                : { background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)', color: '#FCD34D' }
+              }
+            >
+              <AlertTriangle size={15} className="flex-shrink-0" />
+              <span>
+                {level === 'over'
+                  ? <>🚫 <strong>{cat}</strong> budget exceeded — spent {formatCurrency(spent)} of {formatCurrency(limit)} limit</>
+                  : <>⚠️ <strong>{cat}</strong> is {Math.round(pct)}% used — {formatCurrency(limit - spent)} remaining</>
+                }
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Add Form */}
         <GlassCard>
@@ -72,7 +129,7 @@ export default function ExpenseTracker() {
               />
             </div>
             <div>
-              <label className="label">Amount ($)</label>
+              <label className="label">Amount (₹)</label>
               <input
                 type="number"
                 min="0"

@@ -13,7 +13,7 @@ const SUGGESTIONS = [
 export default function AIChatWidget() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm FinPilot AI 👋 Ask me anything about your finances!" },
+    { role: 'assistant', content: "Hi! I'm MoneyBuddy AI 👋 Ask me anything about your finances!" },
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -61,7 +61,7 @@ export default function AIChatWidget() {
                   <Zap size={13} className="text-white" />
                 </div>
                 <div>
-                  <p className="text-sm font-bold gradient-text leading-none">FinPilot AI</p>
+                  <p className="text-sm font-bold gradient-text leading-none">MoneyBuddy AI</p>
                   <p className="text-xs text-green-400 flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" /> Online
                   </p>

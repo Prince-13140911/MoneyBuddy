@@ -4,11 +4,15 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#020617',
-        surface: '#0F172A',
-        primary: { DEFAULT: '#6366F1', dark: '#4F46E5' },
-        secondary: { DEFAULT: '#14B8A6', dark: '#0D9488' },
-        success: '#22C55E',
+        background: 'var(--bg)',
+        surface:    'var(--surface)',
+        primary:    { DEFAULT: '#0EA5E9', dark: '#0284C7' },
+        accent:     { DEFAULT: '#10B981', dark: '#059669' },
+        secondary:  { DEFAULT: '#6EE7B7', dark: '#34D399' },
+        success:    '#22C55E',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
       },
     },
   },

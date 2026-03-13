@@ -15,7 +15,7 @@ const SUGGESTIONS = [
 const initialMessages = [
   {
     role: 'assistant',
-    content: "Hi! I'm FinPilot AI, your personal financial co-pilot 🚀 I can analyze your spending, answer budgeting questions, and help you make smarter financial decisions. What would you like to know?",
+    content: "Hi! I'm MoneyBuddy AI, your personal financial co-pilot 🚀 I can analyze your spending, answer budgeting questions, and help you make smarter financial decisions. What would you like to know?",
   },
 ]
 
@@ -64,7 +64,7 @@ export default function AIAdvisor() {
         </div>
         <div>
           <h2 className="font-bold text-slate-100 flex items-center gap-2">
-            FinPilot AI <Sparkles size={14} className="text-secondary" />
+            MoneyBuddy AI <Sparkles size={14} className="text-secondary" />
           </h2>
           <p className="text-xs text-slate-500">Powered by GPT-4 · Analyzes your real spending data</p>
         </div>
